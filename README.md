@@ -29,7 +29,6 @@ git clone <repository-url>
    cp .env.example .env
    ```
 
-   On Windows PowerShell, use `Copy-Item .env.example .env` instead of `cp` if needed. Do not commit `.env`; it contains local settings and secrets.
 
 2. Edit `.env`. The checked-in example is configured for MySQL. Create a database (the default name is `video_call`) and set `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD` to match your local MySQL installation.
 
@@ -59,11 +58,7 @@ git clone <repository-url>
 
    Use the WebSocket URL and credentials from your LiveKit server/project. Without these values, the web app can load, but joining a live video meeting will fail. Keep API secrets private.
 
-6. Optional: configure `AI_SUMMARY_URL` and `AI_SUMMARY_KEY` if you have a compatible transcript summarization service. Without them, summaries cannot be generated; the app reports that configuration is missing.
-
 ## Run locally
-
-Open two terminals from the `videoCall` directory.
 
 Terminal 1 — Laravel backend:
 
@@ -77,7 +72,12 @@ Terminal 2 — Vite frontend in development mode:
 npm run dev
 ```
 
-Open the URL printed by `php artisan serve` (typically <http://127.0.0.1:8000>). Register an account, then use the dashboard to create a meeting and share its invitation link. Allow camera and microphone access in your browser. For people on separate devices or networks, the app and LiveKit server must both be reachable by those devices; HTTPS is generally required for camera/microphone access outside localhost.
+Open the URL:
+'''
+http://127.0.0.1:8000/login
+(http://127.0.0.1:8000/dashboard)
+'''
+Register an account, then use the dashboard to create a meeting and share its invitation link. Allow camera and microphone access in your browser. For people on separate devices or networks, the app and LiveKit server must both be reachable by those devices; HTTPS is generally required for camera/microphone access outside localhost.
 
 For a production-style frontend build, run `npm run build` and serve the Laravel app with a web server configured for Laravel's `public/` directory.
 
@@ -112,15 +112,3 @@ npm run build                # Build frontend assets
 - **Video call cannot connect:** Check all three `LIVEKIT_*` values, confirm the LiveKit server is reachable, and allow camera/microphone access in the browser.
 - **Frontend assets are missing:** Run `npm install` and `npm run build`, or keep `npm run dev` running during development.
 - **Permission or cached configuration issues:** Run `php artisan optimize:clear` and retry.
-
-## Tests
-
-Run the Laravel feature and unit tests with:
-
-```bash
-php artisan test
-```
-
-## License
-
-No project-specific license is declared in this repository. Ask the project owner before redistributing it.
