@@ -1,11 +1,11 @@
 ﻿<script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import WorkspaceSidebar from '@/Components/WorkspaceSidebar.vue';
 import { ref } from 'vue';
 
 const meetingCode = ref('');
-const createMeeting = () => { const code = crypto.randomUUID().slice(0, 8); window.location.href = route('meeting.show', { code }); };
+const createMeeting = () => router.post(route('meetings.store'), {});
 const joinMeeting = () => {
     if (!meetingCode.value.trim()) return alert('Enter a meeting code to continue.');
     const code = meetingCode.value.trim().split('/').filter(Boolean).pop();
@@ -97,6 +97,7 @@ const tools = [
         </div>
     </AuthenticatedLayout>
 </template>
+
 
 
 

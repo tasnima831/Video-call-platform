@@ -36,6 +36,7 @@ return [
     ],
 
     
+    'ai_summary' => ['url' => env('AI_SUMMARY_URL'), 'key' => env('AI_SUMMARY_KEY')],
     'livekit' => [
     'url' => env('LIVEKIT_URL'),
     'api_key' => env('LIVEKIT_API_KEY'),
@@ -44,3 +45,4 @@ return [
 
 
 ];
+
