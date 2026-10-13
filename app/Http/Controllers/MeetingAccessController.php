@@ -15,6 +15,11 @@ class MeetingAccessController extends Controller
     public function status(Request $request, string $code, LiveKitTokenService $tokens): JsonResponse
     {
         $meeting = Meeting::where('code', strtoupper($code))->firstOrFail();
+        $this->closeIfExpired($meeting);
+        if ($meeting->status === 'ended') {
+            return response()->json(['state' => 'ended']);
+        }
+
         $participantId = $request->session()->get('meeting_participant_'.$meeting->id);
         $participant = $participantId
             ? MeetingParticipant::where('meeting_id', $meeting->id)->find($participantId)
@@ -27,10 +32,7 @@ class MeetingAccessController extends Controller
         if ($participant->state !== 'admitted') {
             return response()->json(['state' => 'waiting']);
         }
-        if ($request->session()->get('meeting_token_issued_'.$meeting->id)) {
-            return response()->json(['state' => 'admitted', 'token_issued' => true]);
-        }
-        if ($meeting->status === 'ended' || !$meeting->started_at) {
+        if (!$meeting->started_at) {
             throw ValidationException::withMessages(['meeting' => 'The host has not started this meeting yet.']);
         }
 
@@ -40,8 +42,6 @@ class MeetingAccessController extends Controller
         } catch (RuntimeException $exception) {
             throw ValidationException::withMessages(['meeting' => $exception->getMessage()]);
         }
-        $request->session()->put('meeting_token_issued_'.$meeting->id, true);
-
         return response()->json([
             'state' => 'admitted',
             'participant' => ['identity' => $participant->identity, 'display_name' => $participant->display_name, 'role' => $participant->role],
@@ -49,6 +49,14 @@ class MeetingAccessController extends Controller
             'participants' => $meeting->participants()->whereNull('left_at')->where('state', 'admitted')->get(['identity', 'display_name', 'role']),
             ...$credentials,
         ]);
+    }
+
+    public function health(string $code): JsonResponse
+    {
+        $meeting = Meeting::where('code', strtoupper($code))->firstOrFail();
+        $this->closeIfExpired($meeting);
+
+        return response()->json(['state' => $meeting->status === 'ended' ? 'ended' : 'active']);
     }
 
     public function waiting(Request $request, string $code): JsonResponse
@@ -75,5 +83,15 @@ class MeetingAccessController extends Controller
         ]);
 
         return response()->json(['ok' => true]);
+    }
+
+    private function closeIfExpired(Meeting $meeting): void
+    {
+        if ($meeting->status !== 'ended' && $meeting->started_at &&
+            $meeting->started_at->copy()->addMinutes($meeting->duration_limit_minutes)->isPast()) {
+            $meeting->update(['status' => 'ended', 'ended_at' => now()]);
+            $meeting->participants()->whereNull('left_at')->update(['left_at' => now()]);
+            $meeting->refresh();
+        }
     }
 }

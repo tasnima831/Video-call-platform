@@ -26,6 +26,7 @@ Route::get('/meeting/{code}', [MeetingController::class, 'show'])
 Route::post('/meeting/{code}/join', [MeetingController::class, 'join'])
     ->where('code', '[A-Za-z0-9-]+')->middleware('throttle:30,1')->name('meeting.join');
 Route::get('/meeting/{code}/status', [MeetingAccessController::class, 'status'])->name('meeting.status');
+Route::get('/meeting/{code}/health', [MeetingAccessController::class, 'health'])->name('meeting.health');
 Route::get('/meeting/{code}/chat', [MeetingMessagesController::class, 'index'])->name('meeting.chat.index');
 Route::post('/meeting/{code}/chat', [MeetingMessagesController::class, 'store'])->middleware('throttle:60,1')->name('meeting.chat.store');
 
