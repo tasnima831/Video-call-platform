@@ -18,10 +18,7 @@ Use the repository URL supplied by the project owner in place of `<repository-ur
 
 ```bash
 git clone <repository-url>
-cd <repository-folder>/videoCall
 ```
-
-If the repository itself is the `videoCall` directory, just `cd` into the cloned folder. On Windows PowerShell, the same commands work in a terminal with Git installed.
 
 ## Install and configure
 
