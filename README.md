@@ -1,59 +1,129 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+﻿# Meetly — Video Calling App
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Meetly is a Laravel and Vue web app for creating meeting rooms and joining them with a link. It includes account registration and sign-in, a dashboard, meeting history, participant waiting/approval, in-room chat, notes, recordings, plan selection, and transcript summaries. Live audio/video is provided by LiveKit.
 
-## About Laravel
+## What you need
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Install these before starting:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- PHP 8.2 or newer with the extensions required by Laravel (including PDO and the driver for your database)
+- [Composer](https://getcomposer.org/)
+- [Node.js](https://nodejs.org/) and npm
+- MySQL 8+ (or configure another Laravel-supported database)
+- A LiveKit server/project for actual audio and video calls
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Clone the project
 
-## Learning Laravel
+Use the repository URL supplied by the project owner in place of `<repository-url>`:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```bash
+git clone <repository-url>
+cd <repository-folder>/videoCall
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+If the repository itself is the `videoCall` directory, just `cd` into the cloned folder. On Windows PowerShell, the same commands work in a terminal with Git installed.
 
-## Laravel Sponsors
+## Install and configure
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+1. Install PHP dependencies and create your local environment file:
 
-### Premium Partners
+   ```bash
+   composer install
+   cp .env.example .env
+   ```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+   On Windows PowerShell, use `Copy-Item .env.example .env` instead of `cp` if needed. Do not commit `.env`; it contains local settings and secrets.
 
-## Contributing
+2. Edit `.env`. The checked-in example is configured for MySQL. Create a database (the default name is `video_call`) and set `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD` to match your local MySQL installation.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+   To use SQLite instead, set `DB_CONNECTION=sqlite`, set `DB_DATABASE` to the absolute path of a SQLite database file, and create that file before migrating. Ensure PHP's SQLite PDO extension is enabled.
 
-## Code of Conduct
+3. Generate the application key and apply database migrations:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+   ```bash
+   php artisan key:generate
+   php artisan migrate
+   ```
 
-## Security Vulnerabilities
+4. Install frontend dependencies and build the assets:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+   ```bash
+   npm install
+   npm run build
+   ```
+
+5. Configure LiveKit in `.env` for real calls:
+
+   ```dotenv
+   LIVEKIT_URL=wss://your-livekit-host
+   LIVEKIT_API_KEY=your-api-key
+   LIVEKIT_API_SECRET=your-api-secret
+   ```
+
+   Use the WebSocket URL and credentials from your LiveKit server/project. Without these values, the web app can load, but joining a live video meeting will fail. Keep API secrets private.
+
+6. Optional: configure `AI_SUMMARY_URL` and `AI_SUMMARY_KEY` if you have a compatible transcript summarization service. Without them, summaries cannot be generated; the app reports that configuration is missing.
+
+## Run locally
+
+Open two terminals from the `videoCall` directory.
+
+Terminal 1 — Laravel backend:
+
+```bash
+php artisan serve
+```
+
+Terminal 2 — Vite frontend in development mode:
+
+```bash
+npm run dev
+```
+
+Open the URL printed by `php artisan serve` (typically <http://127.0.0.1:8000>). Register an account, then use the dashboard to create a meeting and share its invitation link. Allow camera and microphone access in your browser. For people on separate devices or networks, the app and LiveKit server must both be reachable by those devices; HTTPS is generally required for camera/microphone access outside localhost.
+
+For a production-style frontend build, run `npm run build` and serve the Laravel app with a web server configured for Laravel's `public/` directory.
+
+## Main project areas
+
+```text
+app/                 Laravel controllers, models, and services
+resources/js/        Vue pages, components, and frontend entry point
+resources/views/     Laravel Blade shell
+routes/              Web and API route definitions
+database/migrations/ Database schema
+src/                 Additional video-call Vue/service code
+public/              Public web root and built assets
+```
+
+Useful pages after signing in include Dashboard, Meetings, Notes, Summaries, and Plans. The welcome page is available at `/`.
+
+## Useful commands
+
+```bash
+php artisan route:list       # Show registered application routes
+php artisan migrate:status   # Check database migrations
+php artisan migrate          # Apply new migrations
+npm run dev                  # Start the Vite development server
+npm run build                # Build frontend assets
+```
+
+## Troubleshooting
+
+- **Database connection error:** Check that the database service is running, the database exists, and the `DB_*` values in `.env` are correct. Run `php artisan config:clear` after changing environment settings.
+- **Missing application key:** Run `php artisan key:generate`.
+- **Video call cannot connect:** Check all three `LIVEKIT_*` values, confirm the LiveKit server is reachable, and allow camera/microphone access in the browser.
+- **Frontend assets are missing:** Run `npm install` and `npm run build`, or keep `npm run dev` running during development.
+- **Permission or cached configuration issues:** Run `php artisan optimize:clear` and retry.
+
+## Tests
+
+Run the Laravel feature and unit tests with:
+
+```bash
+php artisan test
+```
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+No project-specific license is declared in this repository. Ask the project owner before redistributing it.
