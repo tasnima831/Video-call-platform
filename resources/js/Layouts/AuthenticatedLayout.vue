@@ -1,6 +1,5 @@
-<script setup>
+﻿<script setup>
 import { ref } from 'vue';
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
@@ -22,10 +21,13 @@ const showingNavigationDropdown = ref(false);
                         <div class="flex">
                             <!-- Logo -->
                             <div class="flex shrink-0 items-center">
-                                <Link :href="route('dashboard')">
-                                    <ApplicationLogo
-                                        class="block h-9 w-auto fill-current text-gray-800"
-                                    />
+                                <Link :href="route('dashboard')" class="flex items-center gap-3">
+                                    <span class="grid h-10 w-10 place-items-center rounded-2xl bg-indigo-600 text-lg font-bold text-white shadow-md shadow-indigo-200">
+                                        m
+                                    </span>
+                                    <span class="hidden text-lg font-bold tracking-tight text-slate-900 sm:block">
+                                        meetly
+                                    </span>
                                 </Link>
                             </div>
 
@@ -196,3 +198,5 @@ const showingNavigationDropdown = ref(false);
         </div>
     </div>
 </template>
+
+
